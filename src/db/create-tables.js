@@ -1,17 +1,21 @@
-import { Router } from "express";
+import fs from "fs-extra";
+import path from "path";
+import pool from "./connect.js";
 
-import productsHandler from "./handlers.js";
+const tablesFilePath = path.join(process.cwd(), "src/db/tables.sql");
 
-const router = Router();
+const createDefaultTables = async () => {
+  try {
+    // Read the tables.sql file as buffer
+    const buffer = await fs.readFile(tablesFilePath);
+    // Convert buffer to string
+    const tablesSQLQuery = buffer.toString();
+    // execute query
+    await pool.query(tablesSQLQuery);
+    console.log(`✅ Default tables are created.`);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-router.get("/", productsHandler.getAll);
-
-router.post("/", productsHandler.createUser);
-
-router
-  .route("/:id")
-  .get(productsHandler.getById)
-  .put(productsHandler.updateUserById)
-  .delete(productsHandler.deleteUserById);
-
-export default router;
+export default createDefaultTables;
